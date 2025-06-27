@@ -1,0 +1,55 @@
+@startuml
+title Model Context Protocol (MCP) / OpenAPI Server Overview
+
+package "User-Side" {
+      component "<<UI Client>>\n<<Client App>>\nChatBox\n[[https://github.com/chatboxai/chatbox]]" as UI
+      component "<<Library/API>>\nLLM API\nMCP Client (mcp-use)\n[[https://github.com/mcp-use]]" as LLMAPI
+      UI -r-> LLMAPI
+}
+
+package "LLM" {
+    component OLLAMA {
+        [<<LLM Engine/Provider>>\nAgent (LLM / LangChain)\nDeepSeek] as MODEL
+        LLMAPI <--> MODEL
+    }
+}
+
+package "Tool-Provider Side" as TPS {
+    component "<<OpenAPI Adapter>>\nMCP OpenAPI Server\n[[https://github.com/ivo-toby/mcp-openapi-server]]" as OAA
+    [MCP Server] -d-> OAA
+    [MCP Server] -> [File System Tools]
+    [MCP Server] --> [Memory / State Tools]
+}
+OAA -d-> [<<Restful Objects API>>\nApache Causeway] : "RESTful API"
+
+LLMAPI -> [MCP Server]
+
+note bottom of MODEL
+    OpenAI
+    Ollama
+    <u>DeepSeek</u> (Distilled/Q4) choosen, because it's small
+end note
+
+note top of LLMAPI
+* <b>Dynamic Agent Orchestration:
+    The client app uses mcp-use to connect to <b>multiple MCP servers simultaneously,
+    with the ability to <b>dynamically select</b> which server to use for each task.
+    This enables modular, agent-based orchestration of AI workflows.
+* <b>Flexible Server Config:
+    MCP servers — either <b>local or remote</b> — can be <b>configured declaratively via JSON
+    or <b>programmatically</b>, allowing adaptive deployments tailored to different
+    runtime contexts or tools.
+* <b>LLM Interoperability:
+    Language models (e.g. OpenAI, Ollama, DeepSeek) are accessed via standard
+    <b>LangChain adapters</b>, abstracting away vendor-specific logic and enabling seamless
+    switching or combination of models.
+* <b>Tool Access Control:
+    Agents can be granted selective access to tools (e.g. files, APIs, memory) via centralized
+    configuration in mcp-use, ensuring intentional permissioning and reduced risk of unintended
+    tool invocation.
+* <b>Hosted & Web Integration:
+    mcp-use is designed to operate in <b>headless, hosted, or browser-based environments,
+    supporting both <b>local dev</b> and <b>production deployments.
+end note
+
+@enduml

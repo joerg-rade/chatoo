@@ -1,0 +1,60 @@
+@startuml
+'skinparam componentStyle rectangle
+'skinparam shadowing false
+'skinparam monochrome true
+
+package "Docker Host" {
+  [Docker Daemon]
+  [daemon.json (insecure-registries)]
+}
+
+package "Docker Container" {
+  [Your App]
+  [openssl]
+  [Python certifi Store]
+  [System CA Store]
+  [update-ca-certificates]
+  note top of [System CA Store]
+  May need to run:
+  update-ca-certificates
+  end note
+
+  note top of [Python certifi Store]
+  Updated via:
+  pip install --upgrade certifi
+  end note
+}
+
+package "External Network" {
+  [registry.ollama.ai] <<Registry>>
+  [huggingface.co] <<Model Repo>>
+  [Proxy / Firewall] <<Optional>>
+}
+
+[Your App] --> [openssl] : Diagnoses TLS issues
+[Your App] --> [System CA Store] : SSL validation
+[Your App] --> [Python certifi Store] : For Python TLS
+[openssl] -u-> [registry.ollama.ai] : TLS handshake
+[openssl] -u-> [huggingface.co] : TLS handshake
+'[Docker Daemon] --> [daemon.json (insecure-registries)]
+[Docker Daemon] --> [registry.ollama.ai] : Pull image
+[Docker Daemon] --> [huggingface.co] : Fetch models
+[Proxy / Firewall] --> [registry.ollama.ai]
+[Proxy / Firewall] --> [huggingface.co]
+
+
+
+'== Troubleshooting Path ==
+
+package "Fix Path" {
+  [openssl -showcerts] --> [Extract Intermediate or <b>Root CA] #green
+  [Extract Intermediate or <b>Root CA] -u-> [System CA Store] #green : Add .crt file
+  [System CA Store] --> [update-ca-certificates]
+
+  [Extract Intermediate or Root CA] --> [Python certifi Store] : Optional trust
+
+  [registry.ollama.ai] --> [Use Trusted Certificate] : Replace self-signed cert
+  [Docker Daemon] --> [daemon.json (insecure-registries)] : Dev workaround
+}
+
+@enduml
