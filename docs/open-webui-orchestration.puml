@@ -1,0 +1,28 @@
+@startuml
+!theme sketchy-outline
+
+actor User
+rectangle "Open WebUI" {
+  [Chat UI]
+  [Tool Manager]
+  [LLM Engine]
+}
+
+rectangle "LLM Host (e.g. Ollama)" {
+  [Local Model: DeepSeek]
+}
+
+rectangle "MCP Proxy (mcpo)" {
+  [REST API Gateway]
+  [MCP Tool e.g. CLI or Script]
+}
+
+User --> [Chat UI]
+[Chat UI] --> [LLM Engine] : Prompt → Model Response
+[Chat UI] --> [Tool Manager] : Tool Command
+[Tool Manager] --> [REST API Gateway] : API Request
+[REST API Gateway] --> [MCP Tool e.g. CLI or Script] : Execute Task
+
+[LLM Engine] --> [Local Model: DeepSeek] : Inference
+[Chat UI] <-- [Tool Manager] : Result
+@enduml

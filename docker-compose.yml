@@ -1,34 +1,53 @@
 services:
-  chatbox:
-    image: ghcr.io/open-webui/open-webui:main
-    container_name: chatbox_ui
-    restart: unless-stopped
-    ports:
-      - "3000:8080"
-    depends_on:
-      - ollama
-    environment:
-      - OLLAMA_API=http://ollama:11434
-    networks:
-      - ollama_net
 
   ollama:
     build:
       context: ollama
-      dockerfile: Dockerfile
     environment:
-    - HTTP_PROXY=http://zscaler.proxy.int.kn:80
-    - HTTPS_PROXY=http://zscaler.proxy.int.kn:80
-    - NO_PROXY=localhost,127.0.0.1,.int.kn,eks.amazonaws.com,.ecr.aws
+      - HTTP_PROXY=http://zscaler.proxy.int.kn:80
+      - HTTPS_PROXY=http://zscaler.proxy.int.kn:80
+      - NO_PROXY=localhost,127.0.0.1,.int.kn,eks.amazonaws.com,.ecr.aws
+      - OLLAMA_CUDA=1
+      - OLLAMA_GPU_LAYERS=35  # Adjust based on your VRAM
+      - NVIDIA_VISIBLE_DEVICES=1  # Optional: target specific GPU
     ports:
       - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    #restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 8g
+#        reservations:
+#          devices:
+#            - driver: nvidia
+#              count: 1
+#              capabilities: [ gpu ]
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:11434" ]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ollama_net
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - "3000:8080"
     volumes:
-      - ollama_data:/root/.ollama
+      - open-webui:/app/backend/data
+      - ../zscaler-root.crt:/usr/local/share/ca-certificates/zscaler-root.crt:ro
+    environment:
+      - OLLAMA_API=http://ollama:11434
+      - OLLAMA_API_BASE_URL=http://ollama:11434
+      - REQUESTS_CA_BUNDLE=/usr/local/share/ca-certificates/zscaler-root.crt
+    depends_on:
+      - ollama
+    #restart: unless-stopped
     networks:
       - ollama_net
 
@@ -47,12 +66,19 @@ services:
         apt-get update &&
         apt-get install -y curl ca-certificates &&
         update-ca-certificates &&
-        curl -k -v -X POST http://ollama:11434/api/pull -d '{\"name\":\"deepseek-r1:8b\"}'
+        curl -k -v -X POST http://ollama:11434/api/pull -d '{\"name\":\"deepseek-r1:7b\"}'
       "
+
+  mcpo:
+    build:
+      context: mcpo
+    ports:
+      - "8000:8000"
+    #restart: unless-stopped
 
 volumes:
   ollama_data:
+  open-webui:
 
 networks:
   ollama_net:
-

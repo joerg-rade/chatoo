@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "openapi": {
+      "command": "npx",
+      "args": ["-y", "@ivotoby/openapi-mcp-server"],
+      "env": {
+        "API_BASE_URL": "http://host.docker.internal:8080",
+        "OPENAPI_SPEC_PATH": "http://host.docker.internal:8080/restful/swagger/private",
+        "HEADERS": "{\"Authorization\": \"Basic c3ZlbjpwYXNz\"}"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+@startuml
+!define RECTANGLE class
+
+node "User" {
+  artifact "Streamlit UI\n(optional)" as UI
+}
+
+cloud "Docker Host" {
+  node "Ollama Container" {
+    component "LLM Runtime\n(e.g., Qwen2, Mistral)" as LLM
+  }
+
+  node "Tool Server Container" {
+    component "FastAPI Server" as Tools
+    component "Tool Handlers\n(e.g., list_files, summarize)" as ToolFuncs
+  }
+
+  node "LangChain Agent Container" {
+    component "LangChain Agent" as Agent
+    component "OllamaLLM\nIntegration" as OllamaLLM
+    component "Tool Clients\n(MCP REST Calls)" as MCPClient
+  }
+}
+
+UI --> Agent : Sends queries
+Agent --> OllamaLLM : Generates responses
+Agent --> MCPClient : Discovers & calls tools via MCP
+MCPClient --> Tools : REST API Calls
+Tools --> ToolFuncs : Executes tool logic
+@enduml

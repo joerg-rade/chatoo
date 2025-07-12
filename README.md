@@ -1,7 +1,7 @@
 # chatoo
 LLM interacting with Restful Objects 
 
-![Components Overview](./components.svg)
+![Components Overview](./docs/components.svg)
 
 OpenSource ToolChain
 

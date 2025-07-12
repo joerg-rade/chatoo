@@ -1,0 +1,27 @@
+@startuml
+title MCP_Use Deployment Diagram (Virtual Environment Setup)
+
+node "Developer Machine" {
+    node "Python Virtual Environment\n(mcp_env)" {
+        artifact ".env file\n(API keys, config)"
+        artifact "mcp-use\n(client library)"
+        artifact "LangChain Provider\n(e.g. langchain-openai)"
+        artifact "User Script\n(verify_setup.py)"
+    }
+
+    node "Local MCP Servers" {
+        artifact "Filesystem Server\n(mcp-server-filesystem)"
+        artifact "SQLite Server\n(mcp-server-sqlite)"
+        artifact "Playwright Server\n(@playwright/mcp)"
+    }
+}
+
+database "LLM Provider\n(OpenAI, Anthropic, Groq, Google)" as LLM
+
+"User Script\n(verify_setup.py)" --> "mcp-use\n(client library)" : imports
+"mcp-use\n(client library)" -l-> "LangChain Provider\n(e.g. langchain-openai)" : uses
+"mcp-use\n(client library)" -u-> ".env file\n(API keys, config)" : loads config
+"mcp-use\n(client library)" --> "Local MCP Servers" : JSON-RPC / subprocess
+"LangChain Provider\n(e.g. langchain-openai)" -u-> LLM : API calls
+
+@enduml
