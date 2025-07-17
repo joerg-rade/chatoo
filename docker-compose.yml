@@ -35,46 +35,65 @@ services:
       - ollama_net
 
   open-webui:
-    image: ghcr.io/open-webui/open-webui:main
+    build:
+      context: open-webui
     ports:
       - "3000:8080"
     volumes:
       - open-webui:/app/backend/data
-      - ../zscaler-root.crt:/usr/local/share/ca-certificates/zscaler-root.crt:ro
     environment:
       - OLLAMA_API=http://ollama:11434
       - OLLAMA_API_BASE_URL=http://ollama:11434
       - REQUESTS_CA_BUNDLE=/usr/local/share/ca-certificates/zscaler-root.crt
     depends_on:
       - ollama
-    #restart: unless-stopped
+    restart: unless-stopped
     networks:
       - ollama_net
 
-  model_puller:
-    image: debian:bookworm-slim
-    user: root
+  model-puller:
+    build:
+      context: model-puller
     depends_on:
-      ollama:
-        condition: service_healthy
+      - ollama
     networks:
       - ollama_net
     volumes:
       - ../zscaler-root.crt:/usr/local/share/ca-certificates/zscaler-root.crt
     command: >
-      bash -c "
-        apt-get update &&
-        apt-get install -y curl ca-certificates &&
-        update-ca-certificates &&
-        curl -k -v -X POST http://ollama:11434/api/pull -d '{\"name\":\"deepseek-r1:7b\"}'
-      "
+       bash -c "
+          curl -k -v -X POST http://ollama:11434/api/pull -d '{\"name\":\"phi3:3.8b\"}'
+       "
 
   mcpo:
     build:
       context: mcpo
     ports:
       - "8000:8000"
-    #restart: unless-stopped
+    #    depends_on:
+    #      app:
+    #        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - ollama_net
+
+  app:
+    image: apache/causeway-app-helloworld:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - ollama_net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
   ollama_data:
