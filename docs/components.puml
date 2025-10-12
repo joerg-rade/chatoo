@@ -1,36 +1,33 @@
 @startuml
 title Model Context Protocol (MCP) / OpenAPI Server Overview
 
-package "User-Side" {
-      component "<<UI Client>>\n<<Client App>>\nChatBox\n[[https://github.com/chatboxai/chatbox]]" as UI
-      component "<<Library/API>>\nLLM API\nMCP Client (mcp-use)\n[[https://github.com/mcp-use]]" as LLMAPI
-      UI -r-> LLMAPI
+component "<<UI Client>>\nOpen WebUI\n[[https://github.com/open-webui]]" as UI {
+    port "3000" as UIP
 }
 
-package "LLM" {
-    component OLLAMA {
-        [<<LLM Engine/Provider>>\nAgent (LLM / LangChain)\nDeepSeek] as MODEL
-        LLMAPI <--> MODEL
-    }
+component "<<LLM Adapter>>\nOllama " as OLLAMA {
+    port "11434" as OP
+    database "<<LLM Engine>>\n* DeepSeek\n* Phi3" as LLM
 }
 
-package "Tool-Provider Side" as TPS {
-    component "<<OpenAPI Adapter>>\nMCP OpenAPI Server\n[[https://github.com/ivo-toby/mcp-openapi-server]]" as OAA
-    [MCP Server] -d-> OAA
-    [MCP Server] -> [File System Tools]
-    [MCP Server] --> [Memory / State Tools]
+component "<<OpenAPI Adapter>>\nMCP OpenAPI Server\n[[https://github.com/ivo-toby/mcp-openapi-server]]" as OAA {
+    port "8000" as OAP
 }
-OAA -d-> [<<Restful Objects API>>\nApache Causeway] : "RESTful API"
 
-LLMAPI -> [MCP Server]
+component "<<Restful Objects API>>\nApache Causeway" as RO {
+    port "8080" as ROP
+}
 
-note bottom of MODEL
-    OpenAI
-    Ollama
-    <u>DeepSeek</u> (Distilled/Q4) choosen, because it's small
+OAA --> ROP : RESTful API
+UI <--> OP
+UI --> OAP
+
+note bottom of LLM
+    Small, Quantized, Distilled models
+    allow use on consumer hardware
 end note
 
-note top of LLMAPI
+/'note top of UI
 * <b>Dynamic Agent Orchestration:
     The client app uses mcp-use to connect to <b>multiple MCP servers simultaneously,
     with the ability to <b>dynamically select</b> which server to use for each task.

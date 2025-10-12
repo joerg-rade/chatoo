@@ -1,0 +1,42 @@
+@startuml
+allowmixing
+title AI User Interaction Overview
+actor "User" as User
+
+class "AI Model" as AIModel {
+    + generateResponse(input: String): String
+    + trainModel(data: DataSet): void
+}
+class Prompt {
+    + text: String
+    + context: Map<String, String>
+}
+class Response {
+    + text: String
+    + confidenceScore: Float
+}
+class Interaction {
+    + timestamp: Date
+    + userId: String
+    + prompt: Prompt
+    + response: Response
+}
+class DialogueManager {
+    + startDialogue(userId: String): Dialogue
+    + endDialogue(dialogueId: String): void
+    + getDialogueHistory(userId: String): List<Interaction>
+}
+class Dialogue {
+    + id: String
+    + userId: String
+    + interactions: List<Interaction>
+}
+Interaction -- "1" Prompt : contains >
+Interaction -- "1" Response : contains >
+Dialogue -- "0..*" Interaction : includes >
+DialogueManager -- "0..*" Dialogue : manages >
+AIModel -- "0..*" Interaction : generates >
+'User --> DialogueManager : initiates >
+User -u-> Prompt : creates >
+User -u-> Response : receives >
+@enduml

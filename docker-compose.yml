@@ -1,78 +1,53 @@
 services:
-
-  ollama:
-    build:
-      context: ollama
-    environment:
-      - HTTP_PROXY=http://zscaler.proxy.int.kn:80
-      - HTTPS_PROXY=http://zscaler.proxy.int.kn:80
-      - NO_PROXY=localhost,127.0.0.1,.int.kn,eks.amazonaws.com,.ecr.aws
-      - OLLAMA_CUDA=1
-      - OLLAMA_GPU_LAYERS=35  # Adjust based on your VRAM
-      - NVIDIA_VISIBLE_DEVICES=1  # Optional: target specific GPU
+  librechat:
+    image: librechat/librechat:v0.8.0   # 0.7.0, 0.8.0/latest have problems with login
     ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    #restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 8g
-        reservations:
-          memory: 8g
-#        reservations:
-#          devices:
-#            - driver: nvidia
-#              count: 1
-#              capabilities: [ gpu ]
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:11434" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - ollama_net
-
-  open-webui:
-    build:
-      context: open-webui
-    ports:
-      - "3000:8080"
-    volumes:
-      - open-webui:/app/backend/data
+      - "3080:3080"  # LibreChat default port
     environment:
-      - OLLAMA_API=http://ollama:11434
-      - OLLAMA_API_BASE_URL=http://ollama:11434
-      - REQUESTS_CA_BUNDLE=/usr/local/share/ca-certificates/zscaler-root.crt
+      - ADMIN=true
+      - ALLOW_REGISTRATION=true
+      - ALLOW_EMAIL_LOGIN=true
+      - ALLOW_SOCIAL_LOGIN=false
+      - ALLOW_SOCIAL_REGISTRATION=false
+      - ALLOW_UNVERIFIED_EMAIL_LOGIN=true
+      - MONGO_URI=mongodb://mongo:27017/librechat
+      - JWT_SECRET=devSecret123
+      - SESSION_SECRET=devSession456
+      - ACCESS_TOKEN_SECRET=devAccess789
+      - JWT_REFRESH_SECRET=devRefresh321
+      - REFRESH_TOKEN_SECRET=devRefresh321
+      - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
     depends_on:
-      - ollama
+        - mongo
+    volumes:
+      - librechat_data:/app/data
     restart: unless-stopped
-    networks:
-      - ollama_net
 
-  model-puller:
-    build:
-      context: model-puller
-    depends_on:
-      - ollama
-    networks:
-      - ollama_net
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: librechat
+      POSTGRES_USER: librechat_user
+      POSTGRES_PASSWORD: librechat_pass
     volumes:
-      - ../zscaler-root.crt:/usr/local/share/ca-certificates/zscaler-root.crt
-    command: >
-       bash -c "
-          curl -k -v -X POST http://ollama:11434/api/pull -d '{\"name\":\"phi3:3.8b\"}'
-       "
+      - librechat_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   mcpo:
     build:
       context: mcpo
     ports:
       - "8000:8000"
-    #    depends_on:
-    #      app:
-    #        condition: service_healthy
+    depends_on:
+      app:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000" ]
       interval: 10s
@@ -97,7 +72,7 @@ services:
 
 volumes:
   ollama_data:
-  open-webui:
+  librechat_data:
 
 networks:
   ollama_net:
