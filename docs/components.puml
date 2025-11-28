@@ -1,16 +1,19 @@
 @startuml
 title Model Context Protocol (MCP) / OpenAPI Server Overview
 
-component "<<UI Client>>\nOpen WebUI\n[[https://github.com/open-webui]]" as UI {
-    port "3000" as UIP
+actor USER
+
+component "<<MCP Host / UI Client>>\nLibrechat\n[[https://github.com/danny-avila/LibreChat]]" as UI {
+    port "3080" as UIP
+    component "<<MCP Client>>" as CLIENT
 }
 
 component "<<LLM Adapter>>\nOllama " as OLLAMA {
     port "11434" as OP
-    database "<<LLM Engine>>\n* DeepSeek\n* Phi3" as LLM
+    database "Ollama Data\n* <<LLM>> DeepSeek\n* <<LLM>> Phi3" as LLM
 }
 
-component "<<OpenAPI Adapter>>\nMCP OpenAPI Server\n[[https://github.com/ivo-toby/mcp-openapi-server]]" as OAA {
+component "<<MCP Server>>\nOpenAPI Adapter\n[[https://github.com/ivo-toby/mcp-openapi-server]]" as OAA {
     port "8000" as OAP
 }
 
@@ -18,9 +21,13 @@ component "<<Restful Objects API>>\nApache Causeway" as RO {
     port "8080" as ROP
 }
 
+component "Modell Puller" as MP
+
 OAA --> ROP : RESTful API
 UI <--> OP
-UI --> OAP
+CLIENT --> OAP
+USER -> UIP
+MP -u-> LLM : store
 
 note bottom of LLM
     Small, Quantized, Distilled models

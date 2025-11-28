@@ -1,25 +1,21 @@
-version: "3.9"
-
 services:
-  ollama-init:
-    image: ollama/ollama
-    volumes:
-      - ollama_data:/root/.ollama
-    command: ollama pull phi
-    networks:
-      - ollama_net
-
   ollama:
-    image: ollama/ollama
+    image: ollama/ollama:latest
     ports:
       - "11434:11434"
+    environment:
+      - OLLAMA_NO_GPU=true
     volumes:
       - ollama_data:/root/.ollama
-    restart: unless-stopped
+      - ./models:/root/.ollama/models
     networks:
       - ollama_net
-    depends_on:
-      - ollama-init
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "ollama serve &
+      sleep 10 &&
+      ollama cp /root/.ollama/models/phi-2.gguf phi:latest &&
+      wait"
 
   librechat:
     image: librechat/librechat:v0.8.0
@@ -27,6 +23,7 @@ services:
       - "3080:3080"
     dns:
       - 8.8.8.8
+      - 1.1.1.1
     environment:
       - ADMIN=true
       - ALLOW_REGISTRATION=true
@@ -42,27 +39,39 @@ services:
       - REFRESH_TOKEN_SECRET=devRefresh321
       - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       - OLLAMA_ENABLED=true
-      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_BASE_URL=http://ollama:11434
       - OLLAMA_MODELS=phi:2
     depends_on:
-      - mongo
-      - ollama
+      mongo:
+        condition: service_started
+      ollama:
+        condition: service_started
     volumes:
       - librechat_data:/app/data
-      - ./librechat.yaml:/app/librechat.yaml  # Mount your MCP config
+      - ./librechat.yaml:/app/librechat.yaml
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3080"]
+      test: [ "CMD", "curl", "-f", "http://localhost:3080" ]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - ollama_net
+    command:
+      - ollama serve
 
   mongo:
     image: mongo:6
     ports:
       - "27017:27017"
+#    logging:
+#      driver: "none"
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
     networks:
       - ollama_net
 

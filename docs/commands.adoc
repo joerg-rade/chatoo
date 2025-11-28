@@ -1,0 +1,9 @@
+'''
+docker inspect chatoo-mongo-1
+docker logs chatoo-mongo-1
+
+docker stats
+docker exec -it chatoo-mongo-1 sh
+and run curl http://localhost:11434
+
+'''
