@@ -1,21 +1,31 @@
 services:
   ollama:
-    image: ollama/ollama:latest
+    build: ./ollama
     ports:
       - "11434:11434"
     environment:
       - OLLAMA_NO_GPU=true
     volumes:
       - ollama_data:/root/.ollama
-      - ./models:/root/.ollama/models
+    #      - ./models:/root/.ollama/models
     networks:
       - ollama_net
     entrypoint: ["/bin/sh", "-c"]
+    # a healthcheck can be added here if ollama supports it in the future
+    # currently the image doesn't contain: curl, wget, etc.
+    healthcheck:
+      test: [ "CMD-SHELL", "ollama list || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     command: >
       "ollama serve &
-      sleep 10 &&
-      ollama cp /root/.ollama/models/phi-2.gguf phi:latest &&
-      wait"
+      sleep 5 &&
+      ollama pull phi3 && 
+      ollama list &&
+      wait
+      "
 
   librechat:
     image: librechat/librechat:v0.8.0
@@ -39,16 +49,16 @@ services:
       - REFRESH_TOKEN_SECRET=devRefresh321
       - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       - OLLAMA_ENABLED=true
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - OLLAMA_MODELS=phi:2
+      - OLLAMA_BASE_URL=http://ollama:11434/v1
     depends_on:
       mongo:
         condition: service_started
       ollama:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - librechat_data:/app/data
       - ./librechat.yaml:/app/librechat.yaml
+      - ./librechat_data/auth.json:/app/api/data/auth.json
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3080" ]
@@ -57,15 +67,11 @@ services:
       retries: 5
     networks:
       - ollama_net
-    command:
-      - ollama serve
 
   mongo:
     image: mongo:6
     ports:
       - "27017:27017"
-#    logging:
-#      driver: "none"
     healthcheck:
       test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 5s

@@ -1,18 +1,18 @@
 # chatoo
-LLM interacting with Restful Objects 
+LLM interacting with Restful Objects
 
 ![Components Overview](./docs/components.svg)
 
 ## Install 
-'''
+```bash
 docker-compose up -d --build
-'''
+```
 
 ## OpenSource ToolChain
 
 | Component Role      | Name               | Source                                                    | License          | URL                        |
 |---------------------|--------------------|-----------------------------------------------------------|------------------|----------------------------|
-| UI-Client           | open-webui         | https://github.com/open-webui/open-webui                  | MIT / Custom BSD | https://localhost:3000     |
+| UI-Client           | librechat          | https://github.com/open-webui/open-webui                  | MIT / Custom BSD | https://localhost:3000     |
 | LLM Host            | ollama             | https://github.com/ollama/ollama                          | MIT              | http://localhost:11434     |
 | LLM (model)         | Phi3               | https://huggingface.co/microsoft/Phi-3-mini-128k-instruct | MIT              | ?                          |
 | MCP Client          | mcpo               | x                                                         | ?                | ?                          |

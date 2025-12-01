@@ -1,9 +1,9 @@
 @startuml
-title Model Context Protocol (MCP) / OpenAPI Server Overview
+'title Model Context Protocol (MCP) / OpenAPI Server Overview
 
 actor USER
 
-component "<<MCP Host / UI Client>>\nLibrechat\n[[https://github.com/danny-avila/LibreChat]]" as UI {
+component "<<MCP Host / UI Client>>\n[[https://github.com/danny-avila/LibreChat Librechat]]" as UI {
     port "3080" as UIP
     component "<<MCP Client>>" as CLIENT
 }
@@ -13,21 +13,18 @@ component "<<LLM Adapter>>\nOllama " as OLLAMA {
     database "Ollama Data\n* <<LLM>> DeepSeek\n* <<LLM>> Phi3" as LLM
 }
 
-component "<<MCP Server>>\nOpenAPI Adapter\n[[https://github.com/ivo-toby/mcp-openapi-server]]" as OAA {
+component "<<MCP Server>>\nOpenAPI Adapter\n[[https://github.com/ivo-toby/mcp-openapi-server mcp-openapi-server]]" as OAA {
     port "8000" as OAP
 }
 
-component "<<Restful Objects API>>\nApache Causeway" as RO {
+component "<<[[https://www.restfulobjects.org/spec/1.0/about.html Restful Objects API]]>>\nApache Causeway" as RO {
     port "8080" as ROP
 }
-
-component "Modell Puller" as MP
 
 OAA --> ROP : RESTful API
 UI <--> OP
 CLIENT --> OAP
 USER -> UIP
-MP -u-> LLM : store
 
 note bottom of LLM
     Small, Quantized, Distilled models

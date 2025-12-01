@@ -1,13 +1,21 @@
-version: "1.3.0"
+version: 1.0.5
+cache: true
 
 endpoints:
   custom:
-    - name: ollama
-      type: streamable-http
-      url: http://ollama:11434
+    - name: "Ollama"
+      apiKey: "ollama"
+      baseURL: "http://ollama:11434/v1"
       models:
         default:
-          - phi
+          - "phi3:latest"
+          - "deepseek-r1:8b"
+        fetch: false
+      titleConvo: true
+      titleModel: "phi3:latest"
+      summarize: false
+      summaryModel: "phi3:latest"
+      forcePrompt: false
 
 #mcpServers:
 #  ollama:
