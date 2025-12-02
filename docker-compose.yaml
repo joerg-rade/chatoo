@@ -7,7 +7,6 @@ services:
       - OLLAMA_NO_GPU=true
     volumes:
       - ollama_data:/root/.ollama
-    #      - ./models:/root/.ollama/models
     networks:
       - ollama_net
     entrypoint: ["/bin/sh", "-c"]
@@ -78,6 +77,38 @@ services:
       timeout: 3s
       retries: 10
       start_period: 10s
+    networks:
+      - ollama_net
+
+  mcpo:
+    build:
+      context: mcpo
+    ports:
+      - "8000:8000"
+    depends_on:
+      app:
+        condition: service_started
+    #      librechat:
+    #        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - ollama_net
+
+  app:
+    image: apache/causeway-app-helloworld:latest
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
     networks:
       - ollama_net
 

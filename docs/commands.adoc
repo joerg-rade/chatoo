@@ -1,4 +1,4 @@
-'''
+```
 docker inspect chatoo-mongo-1
 docker logs chatoo-mongo-1
 
@@ -13,4 +13,10 @@ $docker exec -it chatoo-ollama-1 sh
 
 $curl http://localhost:11434/api/tags
 [browser] http://localhost:11434/api/tags
-'''
+```
+
+```
+$nvidia-smi
+
+
+```
