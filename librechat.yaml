@@ -8,27 +8,28 @@ endpoints:
       baseURL: "http://ollama:11434/v1"
       models:
         default:
-          - "phi3:latest"
-          - "deepseek-r1:8b"
+          - "llama3:8b-instruct:latest"
+          - "mistral:7b-instruct:latest"
+          - "phi3"
         fetch: false
       titleConvo: true
-      titleModel: "phi3:latest"
+      titleModel: "phi3"
       summarize: false
-      summaryModel: "phi3:latest"
+      summaryModel: "phi3"
       forcePrompt: false
 
-#mcpServers:
-#  ollama:
-#    type: streamable-http
-#    url: http://docker.host.internal:11434/ #in the browser localhost:11434
-#    timeout: 10000
+mcpServers:
+  ollama:
+    type: streamable-http
+    url: http://ollama:11434/v1 #in the browser localhost:11434
+    timeout: 10000
 
-#  openapi:
-#    type: http
-#    url: http://openapi:8000/
-#    headers:
-#      Authorization: "Basic c3ZlbjpwYXNz"
-#    env:
-#      API_BASE_URL: "http://host.docker.internal:8080"
-#      OPENAPI_SPEC_PATH: "http://host.docker.internal:8080/restful/swagger/private"
-#    timeout: 10000
+  openapi:
+    type: http
+    url: http://192.168.178.34:8000/
+    headers:
+      Authorization: "Basic c3ZlbjpwYXNz"
+    env:
+      API_BASE_URL: "http://host.docker.internal:8080"
+      OPENAPI_SPEC_PATH: "http://host.docker.internal:8080/restful/swagger/private"
+    timeout: 10000

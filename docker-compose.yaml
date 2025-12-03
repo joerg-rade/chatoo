@@ -54,6 +54,8 @@ services:
         condition: service_started
       ollama:
         condition: service_healthy
+      mcpo:
+        condition: service_healthy
     volumes:
       - librechat_data:/app/data
       - ./librechat.yaml:/app/librechat.yaml
@@ -87,11 +89,9 @@ services:
       - "8000:8000"
     depends_on:
       app:
-        condition: service_started
-    #      librechat:
-    #        condition: service_started
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/openapi/docs"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -104,7 +104,7 @@ services:
     ports:
       - "8080:8080"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      test: ["CMD", "wget", "--spider", "http://localhost:8080"]
       interval: 10s
       timeout: 5s
       retries: 5

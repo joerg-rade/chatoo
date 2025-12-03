@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Install Node.js and npm directly
 RUN apt-get update && \
+    apt-get install -y curl && \
     apt-get install -y nodejs npm && \
     apt-get clean
 
