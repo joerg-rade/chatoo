@@ -27,7 +27,7 @@ services:
       "
 
   librechat:
-    image: librechat/librechat:v0.8.0
+    image: librechat/librechat:latest
     ports:
       - "3080:3080"
     dns:
@@ -54,7 +54,7 @@ services:
         condition: service_started
       ollama:
         condition: service_healthy
-      mcpo:
+      app:
         condition: service_healthy
     volumes:
       - librechat_data:/app/data
@@ -79,23 +79,6 @@ services:
       timeout: 3s
       retries: 10
       start_period: 10s
-    networks:
-      - ollama_net
-
-  mcpo:
-    build:
-      context: mcpo
-    ports:
-      - "8000:8000"
-    depends_on:
-      app:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/openapi/docs"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
     networks:
       - ollama_net
 

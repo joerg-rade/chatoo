@@ -1,5 +1,6 @@
 @startuml
 'title Model Context Protocol (MCP) / OpenAPI Server Overview
+!theme sketchy-outline
 
 actor USER
 

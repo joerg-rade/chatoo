@@ -1,5 +1,20 @@
+# ollama / GPU
+
+```
+# Ollama configuration for NVIDIA/GPU usage
+OLLAMA_CUDA=1
+# Adjust based on your VRAM
+OLLAMA_GPU_LAYERS=35
+# Optional: target specific GPU
+NVIDIA_VISIBLE_DEVICES=1
+```
+
+# proxy
+
+```
 # proxy settings may be required, when behind an inspecting firewall
 # your milage may vary
 HTTP_PROXY=http://zscaler.proxy.int.kn:80
 HTTPS_PROXY=http://zscaler.proxy.int.kn:80
 NO_PROXY=localhost,127.0.0.1,.int.kn,eks.amazonaws.com,.ecr.aws
+```
