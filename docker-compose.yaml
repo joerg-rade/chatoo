@@ -4,7 +4,7 @@ services:
     ports:
       - "11434:11434"
     environment:
-      - OLLAMA_NO_GPU=true
+      - OLLAMA_ORIGINS=*
     volumes:
       - ollama_data:/root/.ollama
     networks:
@@ -14,6 +14,7 @@ services:
     # currently the image doesn't contain: curl, wget, etc.
     healthcheck:
       test: [ "CMD-SHELL", "ollama list || exit 1" ]
+#      test: [ "CMD", "wget", "--spider", "http://localhost:11434/api/tags" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -48,7 +49,7 @@ services:
       - REFRESH_TOKEN_SECRET=devRefresh321
       - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       - OLLAMA_ENABLED=true
-      - OLLAMA_BASE_URL=http://ollama:11434/v1
+      - OLLAMA_BASE_URL=http://ollama:11434
     depends_on:
       mongo:
         condition: service_started
@@ -101,3 +102,4 @@ volumes:
 
 networks:
   ollama_net:
+#    driver: bridge

@@ -1,21 +1,19 @@
 @startuml
-'title Model Context Protocol (MCP) / OpenAPI Server Overview
-!theme sketchy-outline
+allowmixing
+skinparam nodesep 1ß
+skinparam ranksep 50
 
 actor USER
 
 component "<<MCP Host / UI Client>>\n[[https://github.com/danny-avila/LibreChat Librechat]]" as UI {
     port "3080" as UIP
     component "<<MCP Client>>" as CLIENT
+    component "<<MCP Server>>\nOpenAPI Adapter\n[[https://github.com/ivo-toby/mcp-openapi-server mcp-openapi-server]]" as OAA
 }
 
 component "<<LLM Adapter>>\nOllama " as OLLAMA {
     port "11434" as OP
     database "Ollama Data\n* <<LLM>> DeepSeek\n* <<LLM>> Phi3" as LLM
-}
-
-component "<<MCP Server>>\nOpenAPI Adapter\n[[https://github.com/ivo-toby/mcp-openapi-server mcp-openapi-server]]" as OAA {
-    port "8000" as OAP
 }
 
 component "<<[[https://www.restfulobjects.org/spec/1.0/about.html Restful Objects API]]>>\nApache Causeway" as RO {
@@ -24,34 +22,20 @@ component "<<[[https://www.restfulobjects.org/spec/1.0/about.html Restful Object
 
 OAA --> ROP : RESTful API
 UI <--> OP
-CLIENT --> OAP
-USER -> UIP
+CLIENT -> OAA
+USER --> UIP
+
+note top of UI
+    <b>librechat.yaml
+    configures MCP Client & Server settings.
+    The OpenAPI adapter could be configured
+    as a standalone docker service, but this
+    would then require to use http instead of stdio.
+end note
 
 note bottom of LLM
     Small, Quantized, Distilled models
     allow use on consumer hardware
-end note
-
-/'note top of UI
-* <b>Dynamic Agent Orchestration:
-    The client app uses mcp-use to connect to <b>multiple MCP servers simultaneously,
-    with the ability to <b>dynamically select</b> which server to use for each task.
-    This enables modular, agent-based orchestration of AI workflows.
-* <b>Flexible Server Config:
-    MCP servers — either <b>local or remote</b> — can be <b>configured declaratively via JSON
-    or <b>programmatically</b>, allowing adaptive deployments tailored to different
-    runtime contexts or tools.
-* <b>LLM Interoperability:
-    Language models (e.g. OpenAI, Ollama, DeepSeek) are accessed via standard
-    <b>LangChain adapters</b>, abstracting away vendor-specific logic and enabling seamless
-    switching or combination of models.
-* <b>Tool Access Control:
-    Agents can be granted selective access to tools (e.g. files, APIs, memory) via centralized
-    configuration in mcp-use, ensuring intentional permissioning and reduced risk of unintended
-    tool invocation.
-* <b>Hosted & Web Integration:
-    mcp-use is designed to operate in <b>headless, hosted, or browser-based environments,
-    supporting both <b>local dev</b> and <b>production deployments.
 end note
 
 @enduml

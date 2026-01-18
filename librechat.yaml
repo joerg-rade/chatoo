@@ -1,38 +1,29 @@
-version: 1.3.0
+version: 1.3.1
 cache: true
 
 endpoints:
   custom:
-    - name: "Ollama"
-      apiKey: "ollama"
-      baseURL: "http://ollama:11434/v1"
-      models:
-        default:
-          #          - "llama3:8b-instruct:latest"
-          #          - "mistral:7b-instruct:latest"
-          - "phi3"
-        fetch: false
-      titleConvo: true
-      titleModel: "phi3"
-      summarize: false
-      summaryModel: "phi3"
-      forcePrompt: false
+  - name: "Ollama"
+    apiKey: "ollama"
+    baseURL: "http://ollama:11434/v1"
+    models:
+      default:
+      - "phi3:latest"
+    fetch: true
+    titleConvo: false
+    titleModel: "phi3:latest"
+    modelDisplayLabel: "Ollama"
 
 mcpServers:
-  ollama:
-    type: streamable-http
-    url: http://ollama:11434/api/chat #in the browser localhost:11434
-    timeout: 10000
-
   openapi:
     type: stdio
     command: npx
     args:
-      - "-y"
-      - "@ivotoby/openapi-mcp-server"
-      - "--openapi-spec"
-      - "http://app:8080/restful/swagger/private"
-      - "--api-base-url"
-      - "http://app:8080"
-      - "--auth"
-      - "Basic c3ZlbjpwYXNz"
+    - "-y"
+    - "@ivotoby/openapi-mcp-server"
+    - "--openapi-spec"
+    - "http://app:8080/restful/swagger/private"
+    - "--api-base-url"
+    - "http://app:8080"
+    - "--auth"
+    - "Basic c3ZlbjpwYXNz"
