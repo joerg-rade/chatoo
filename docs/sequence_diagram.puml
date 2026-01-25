@@ -1,0 +1,39 @@
+@startuml
+title LibreChat + Ollama + Phi‑3 + MCP Server (Sequence Flow)
+
+actor User
+
+participant "LibreChat\n(MCP Client + Orchestrator)" as LC
+participant "Ollama 0.14.2\n(Model Runtime)" as Ollama
+participant "Phi‑3\n(LLM)" as Phi3
+participant "openapi-mcp-server\n(MCP Server / Tools)" as MCP
+
+'== User Message ==
+User -> LC: User sends prompt
+
+'== Model Invocation ==
+LC -> Ollama: Send chat request\n(system + user + tool schemas)
+Ollama -> Phi3: Run model inference
+
+'== Model Output ==
+Phi3 --> Ollama: Generate response\n(text or tool call)
+Ollama --> LC: Return model output
+
+'== Tool Call Detection ==
+LC -> LC: Detect tool call in model output
+
+'== MCP Tool Invocation ==
+LC -> MCP: call_tool(name, arguments)
+MCP -> MCP: Execute tool logic
+MCP --> LC: Return tool result
+
+'== Provide Tool Result to Model ==
+LC -> Ollama: Send tool result as\nassistant(tool) message
+Ollama -> Phi3: Continue generation
+Phi3 --> Ollama: Produce final answer
+Ollama --> LC: Return final model output
+
+'== Final Response ==
+LC --> User: Deliver final answer
+
+@enduml

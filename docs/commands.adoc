@@ -15,6 +15,13 @@ $curl http://localhost:11434/api/tags
 [browser] http://localhost:11434/api/tags
 ```
 
+Monitor Logs:
+```
+docker-compose logs -f librechat
+```
+In your chat:
+"Think step-by-step and show your reasoning before answering: [your question]
+
 ```
 $nvidia-smi
 ```

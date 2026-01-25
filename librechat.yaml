@@ -3,16 +3,15 @@ cache: true
 
 endpoints:
   custom:
-  - name: "Ollama"
-    apiKey: "ollama"
+  - name: "Ollama with MCP"
+    apiKey: "not-needed"
     baseURL: "http://ollama:11434/v1"
     models:
       default:
-      - "phi3:latest"
-    fetch: true
-    titleConvo: false
-    titleModel: "phi3:latest"
-    modelDisplayLabel: "Ollama"
+      - "qwen2.5:3b-instruct"
+    capabilities:
+      tools: true
+      mcp: true
 
 mcpServers:
   openapi:
@@ -27,3 +26,12 @@ mcpServers:
     - "http://app:8080"
     - "--auth"
     - "Basic c3ZlbjpwYXNz"
+    - "--allowed-operations"
+    - "hello.HelloWorldObjects"
+
+  filesystem:
+    command: "npx"
+    args:
+    - "-y"
+    - "@modelcontextprotocol/server-filesystem"
+    - "/tmp"
