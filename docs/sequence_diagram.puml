@@ -5,7 +5,7 @@ actor User
 
 participant "LibreChat\n(MCP Client + Orchestrator)" as LC
 participant "Ollama 0.14.2\n(Model Runtime)" as Ollama
-participant "Phi‑3\n(LLM)" as Phi3
+participant "Qwen2.5:3b-instruct\n(LLM)" as LLM
 participant "openapi-mcp-server\n(MCP Server / Tools)" as MCP
 
 '== User Message ==
@@ -13,10 +13,10 @@ User -> LC: User sends prompt
 
 '== Model Invocation ==
 LC -> Ollama: Send chat request\n(system + user + tool schemas)
-Ollama -> Phi3: Run model inference
+Ollama -> LLM: Run model inference
 
 '== Model Output ==
-Phi3 --> Ollama: Generate response\n(text or tool call)
+LLM --> Ollama: Generate response\n(text or tool call)
 Ollama --> LC: Return model output
 
 '== Tool Call Detection ==
@@ -29,8 +29,8 @@ MCP --> LC: Return tool result
 
 '== Provide Tool Result to Model ==
 LC -> Ollama: Send tool result as\nassistant(tool) message
-Ollama -> Phi3: Continue generation
-Phi3 --> Ollama: Produce final answer
+Ollama -> LLM: Continue generation
+LLM --> Ollama: Produce final answer
 Ollama --> LC: Return final model output
 
 '== Final Response ==

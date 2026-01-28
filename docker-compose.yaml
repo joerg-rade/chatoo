@@ -4,9 +4,10 @@ services:
     ports:
       - "11434:11434"
     environment:
-      - OLLAMA_ORIGINS=*
-      - OLLAMA_DEBUG=1
-      - OLLAMA_VERBOSE=1
+    - OLLAMA_ORIGINS=*
+    - OLLAMA_DEBUG=1
+    - OLLAMA_VERBOSE=1
+    - OLLAMA_LOGS=/tmp/ollama.log  # if supported
     volumes:
       - ollama_data:/root/.ollama
     networks:
@@ -52,6 +53,7 @@ services:
       - OLLAMA_ENABLED=true
       - OLLAMA_BASE_URL=http://ollama:11434
       - ENABLE_MCP=true
+      - OPENAPI_OPERATION_FILTER=post-services-simple-simple-objects-actions-create-invoke
     depends_on:
       mongo:
         condition: service_started
@@ -87,7 +89,7 @@ services:
       - ollama_net
 
   app:
-    image: apache/causeway-app-helloworld:latest
+    image: apache/causeway-app-simpleapp:latest
     ports:
       - "8080:8080"
     healthcheck:
