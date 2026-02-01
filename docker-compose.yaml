@@ -101,6 +101,42 @@ services:
     networks:
       - ollama_net
 
+#  inspector:
+#    image: techteamswitzerland/mcpinspector:0.18.0
+#    ports:
+#      - "6274:6274"
+#    networks:
+#      - ollama_net
+#    environment:
+#      - HOST=0.0.0.0      # used to generated link / in the browser replace with 127.0.0.1/localhost
+#      - MCP_INSPECTOR_CONFIG=/config/mcp-inspector.json
+#    volumes:
+#      - ./mcpinspector/mcp-inspector.json:/config/mcp-inspector.json:ro
+#    command: ["node", "client/bin/start.js", "--config", "/config/mcp-inspector.json"]
+#    healthcheck:
+#      test: ["CMD-SHELL", "wget -qO- http://localhost:6274 || exit 1"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
+  mcp-inspector:
+    image: techteamswitzerland/mcpinspector:0.18.0
+    environment:
+      - HOST=0.0.0.0      # used to generated link / in the browser replace with 127.0.0.1/localhost
+  #    - MCP_INSPECTOR_CONFIG=/config/mcp-inspector.json
+    #    volumes:
+#      - DANGEROUSLY_OMIT_AUTH=true # for development only !
+    working_dir: /app
+    volumes:
+    - ./mcp-inspector.json:/app/mcp-inspector.json:ro
+    command: >
+      sh -c "npm install -g @modelcontextprotocol/inspector &&
+             inspector --config /app/mcp-inspector.json"
+    ports:
+    - "6274:6274"
+    - "6277:6277"
+    depends_on:
+    - app
+
 volumes:
   librechat_data:
   ollama_data:
